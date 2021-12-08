@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/menu_search"
+        android:icon="@android:drawable/ic_menu_search"
+        android:orderInCategory="1"
+        android:title="搜索菜单"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="always|collapseActionView" />
+    <item
+        android:id="@+id/menu_share"
+        android:icon="@android:drawable/ic_menu_share"
+        android:orderInCategory="1"
+        android:title="分享菜单"
+        app:actionProviderClass="androidx.appcompat.widget.ShareActionProvider"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_collect"
+        android:icon="@android:drawable/btn_star_big_on"
+        android:orderInCategory="1"
+        android:title="收藏菜单"
+        app:actionLayout="@layout/layout_collect"
+        app:showAsAction="never|collapseActionView" />
+    <item
+        android:id="@+id/menu_previous"
+        android:onClick="onPreviousMenu"
+        android:orderInCategory="1"
+        android:title="这是上一步的菜单展示效果"
+        android:titleCondensed="上一步"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/menu_next"
+        android:onClick="onNextMenu"
+        android:orderInCategory="1"
+        android:title="这是下一步的菜单展示效果"
+        android:titleCondensed="下一步"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/menu_single_check"
+        android:orderInCategory="1"
+        android:title="单选按钮"
+        app:showAsAction="withText">
+        <menu>
+            <group
+                android:id="@+id/group_single"
+                android:checkableBehavior="single"
+                android:menuCategory="system">
+                <item
+                    android:id="@+id/single_menu_01"
+                    android:checked="true"
+                    android:title="单选按钮01" />
+                <item
+                    android:id="@+id/single_menu_02"
+                    android:title="单选按钮02" />
+                <item
+                    android:id="@+id/single_menu_03"
+                    android:title="单选按钮03" />
+            </group>
+        </menu>
+    </item>
+    <item
+        android:id="@+id/menu_all_check"
+        android:orderInCategory="1"
+        android:title="多选按钮"
+        app:showAsAction="withText">
+        <menu>
+            <group
+                android:id="@+id/group_all"
+                android:checkableBehavior="all"
+                android:enabled="true"
+                android:menuCategory="system">
+                <item
+                    android:id="@+id/all_menu_01"
+                    android:checked="true"
+                    android:title="多选按钮01" />
+                <item
+                    android:id="@+id/all_menu_02"
+                    android:title="多选按钮02" />
+                <item
+                    android:id="@+id/all_menu_03"
+                    android:title="多选按钮03" />
+            </group>
+        </menu>
+    </item>
+</menu>
