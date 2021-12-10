@@ -1,6 +1,6 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
-    val gradleVersion by extra("7.0.3")
+    val gradleVersion by extra("7.0.4")
     val kotlinVersion by extra("1.5.31")
     val guardVersion by extra("0.0.1")
     val debugMode by extra(true)
@@ -8,6 +8,7 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        maven("https://maven.aliyun.com/repository/google")
 //        maven("${rootProject.buildDir}${File.separator}repo")
     }
     dependencies {
@@ -21,6 +22,7 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        maven("https://maven.aliyun.com/repository/google")
     }
 }
 

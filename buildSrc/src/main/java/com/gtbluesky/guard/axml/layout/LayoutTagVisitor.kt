@@ -14,12 +14,4 @@ class LayoutTagVisitor(child: NodeVisitor, val config: SuperGuardConfig) : NodeV
         val child = super.child(ns, newName)
         return LayoutTagVisitor(child, config)
     }
-
-    override fun attr(ns: String?, name: String?, resourceId: Int, type: Int, obj: Any?) {
-        super.attr(ns, name, resourceId, type, obj)
-    }
-
-    override fun end() {
-        super.end()
-    }
 }

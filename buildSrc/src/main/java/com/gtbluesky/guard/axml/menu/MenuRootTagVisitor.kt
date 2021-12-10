@@ -12,12 +12,4 @@ class MenuRootTagVisitor(child: NodeVisitor, val config: SuperGuardConfig) : Nod
             else -> child
         }
     }
-
-    override fun attr(ns: String?, name: String?, resourceId: Int, type: Int, obj: Any?) {
-        super.attr(ns, name, resourceId, type, obj)
-    }
-
-    override fun end() {
-        super.end()
-    }
 }

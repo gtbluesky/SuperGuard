@@ -21,6 +21,7 @@ public class Pkg {
     public final int id;
     public String name;
     public TreeMap<Integer, Type> types = new TreeMap<Integer, Type>();
+    public TreeMap<String, Integer> libraries = new TreeMap<String, Integer>();
 
     public Pkg(int id, String name) {
         super();
@@ -34,7 +35,7 @@ public class Pkg {
             if (name != null) {
                 if (type.name == null) {
                     type.name = name;
-                } else if (!name.endsWith(type.name)) {
+                } else if (!name.equals(type.name)) {
                     throw new RuntimeException();
                 }
                 if (type.specs.length != entrySize) {

@@ -2,7 +2,7 @@
 //val guardVersion: String by rootProject.extra
 //val debugMode: Boolean by rootProject.extra
 
-val gradleVersion = "7.0.3"
+val gradleVersion = "7.0.4"
 val guardVersion = "0.0.1"
 val debugMode = true
 

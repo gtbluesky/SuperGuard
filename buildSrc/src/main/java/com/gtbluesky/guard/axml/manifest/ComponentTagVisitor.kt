@@ -1,24 +1,23 @@
 package com.gtbluesky.guard.axml.manifest
 
 import com.gtbluesky.guard.config.SuperGuardConfig
+import pxb.android.Res_value
 import pxb.android.axml.NodeVisitor
 
 class ComponentTagVisitor(child: NodeVisitor, val config: SuperGuardConfig) : NodeVisitor(child) {
 
-    override fun child(ns: String?, name: String?): NodeVisitor {
-        return super.child(ns, name)
-    }
-
-    override fun attr(ns: String?, name: String?, resourceId: Int, type: Int, obj: Any?) {
-        val className = if (name == "name") {
-            config.mappingMap[obj] ?: obj
+    override fun attr(
+        ns: String?,
+        name: String?,
+        resourceId: Int,
+        raw: String?,
+        value: Res_value?
+    ) {
+        if (name == "name") {
+            val replace = config.mappingMap[raw] ?: raw
+            super.attr(ns, name, resourceId, replace, Res_value.newStringValue(replace))
         } else {
-            obj
+            super.attr(ns, name, resourceId, raw, value)
         }
-        super.attr(ns, name, resourceId, type, className)
-    }
-
-    override fun end() {
-        super.end()
     }
 }
