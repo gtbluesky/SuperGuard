@@ -103,37 +103,37 @@ open class SuperGuardTask : DefaultTask() {
     }
 
     private fun buildOptimizeResourcesPath(output: BaseVariantOutput): Path {
-        var infix = variant.buildType.name
-        if (!output.dirName.isNullOrEmpty()) {
-            infix = output.dirName + "-" + infix
-        }
-        if (!variant.flavorName.isNullOrEmpty()) {
-            infix = variant.flavorName + "-" + infix
-        }
+//        var infix = variant.buildType.name
+//        if (!output.dirName.isNullOrEmpty()) {
+//            infix = output.dirName + "-" + infix
+//        }
+//        if (!variant.flavorName.isNullOrEmpty()) {
+//            infix = variant.flavorName + "-" + infix
+//        }
         return Paths.get(
             project.buildDir.path,
             "intermediates",
             "optimized_processed_res",
             variant.name,
-            "resources-${infix}-optimize.ap_"
+            "resources-${output.baseName}-optimize.ap_"
         )
     }
 
     private fun buildObscureResourcesPath(output: BaseVariantOutput): Path {
-        var infix = variant.buildType.name
-        if (!output.dirName.isNullOrEmpty()) {
-            infix = output.dirName + "-" + infix
-        }
-        if (!variant.flavorName.isNullOrEmpty()) {
-            infix = variant.flavorName + "-" + infix
-        }
+//        var infix = variant.buildType.name
+//        if (!output.dirName.isNullOrEmpty()) {
+//            infix = output.dirName + "-" + infix
+//        }
+//        if (!variant.flavorName.isNullOrEmpty()) {
+//            infix = variant.flavorName + "-" + infix
+//        }
         return Paths.get(
             project.buildDir.path,
             "intermediates",
             "obscure_processed_res",
             variant.name,
             if (variant.outputs.size > 1) output.dirName else "",
-            "resources-${infix}-obscure.ap_"
+            "resources-${output.baseName}-obscure.ap_"
         )
     }
 
@@ -164,7 +164,9 @@ open class SuperGuardTask : DefaultTask() {
                 reader = BufferedReader(FileReader(file))
                 var char = reader.readLine()?.trim() ?: ""
                 while(char.isNotEmpty()) {
-                    config.charsFromDic.add(char)
+                    if (!config.charsFromDic.contains(char)) {
+                        config.charsFromDic.add(char)
+                    }
                     char = reader.readLine()?.trim() ?: ""
                 }
                 reader.close()

@@ -24,6 +24,7 @@ java {
 dependencies {
     compileOnly(gradleApi())
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+    //打包改成compileOnly
     implementation("com.android.tools.build:gradle:$gradleVersion")
     implementation("commons-io:commons-io:2.11.0")
 }

@@ -12,9 +12,10 @@ import java.nio.file.Paths
 /**
  * 混淆资源路径和文件名
  * 混淆四大组件（Activity、Service、Broadcast Receiver 和 Content Provider）
- * 混淆自定义Application、自义定View等在xml中所引用的类
+ * 混淆自定义Application、自定义View等在xml中所引用的类
  */
 class SuperGuardPlugin : Plugin<Project> {
+
     override fun apply(project: Project) {
         val isAndroidProject = project.plugins.hasPlugin("com.android.application")
         if (!isAndroidProject) {
@@ -27,12 +28,8 @@ class SuperGuardPlugin : Plugin<Project> {
 
         val android = project.extensions.getByName("android") as AppExtension
         project.afterEvaluate {
-            android.applicationVariants.forEach { variant ->
-//                println("variant name=${variant.name}, flavor=${variant.flavorName}, base=${variant.baseName}, dir=${variant.dirName}, buildType=${variant.buildType.name}")
-//                variant.outputs?.forEach {
-//                    println("variant.output name=${it.name}, base=${it.baseName}, dir=${it.dirName}")
-//                }
-                createGuardTask(project, variant)
+            android.applicationVariants.all {
+                createGuardTask(project, this)
             }
         }
     }

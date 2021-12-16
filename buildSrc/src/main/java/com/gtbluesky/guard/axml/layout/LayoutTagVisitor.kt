@@ -3,7 +3,10 @@ package com.gtbluesky.guard.axml.layout
 import com.gtbluesky.guard.config.SuperGuardConfig
 import pxb.android.axml.NodeVisitor
 
-class LayoutTagVisitor(child: NodeVisitor, val config: SuperGuardConfig) : NodeVisitor(child) {
+class LayoutTagVisitor(
+    child: NodeVisitor,
+    val config: SuperGuardConfig
+) : NodeVisitor(child) {
 
     override fun child(ns: String?, name: String?): NodeVisitor {
         val newName = if (name?.contains(".") == true) {
