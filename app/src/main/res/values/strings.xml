@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">ObscureApk</string>
+    <string name="description">description</string>
+    <string name="summary">summary</string>
 </resources>

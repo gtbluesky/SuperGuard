@@ -1,21 +1,14 @@
-package com.gtbluesky.guard.axml.manifest
+package com.gtbluesky.guard.axml.xml
 
 import com.gtbluesky.guard.config.SuperGuardConfig
 import pxb.android.Res_value
 import pxb.android.axml.NodeVisitor
 
 /**
- * AndroidManifest.xml
-* <manifest>
- *     <application>
- *         <activity/>
- *         <service/>
- *         <receiver/>
- *         <provider/>
- *     </application>
- * </manifest>
+ * res/xml/.xml
+ * <accessibility-service/>
  */
-class ComponentTagVisitor(
+class AccessibilityTagVisitor(
     child: NodeVisitor,
     val config: SuperGuardConfig
 ) : NodeVisitor(child) {
@@ -28,7 +21,7 @@ class ComponentTagVisitor(
         value: Res_value?
     ) {
         var replace = raw
-        if (name == "name" || name == "settingsActivity") {
+        if (name == "settingsActivity") {
             replace = config.mappingMap[raw] ?: raw
             value?.raw = replace
         }

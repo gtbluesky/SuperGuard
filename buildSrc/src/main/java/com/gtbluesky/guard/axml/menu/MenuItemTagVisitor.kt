@@ -4,6 +4,12 @@ import com.gtbluesky.guard.config.SuperGuardConfig
 import pxb.android.Res_value
 import pxb.android.axml.NodeVisitor
 
+/**
+ * res/menu/.xml
+ * <menu>
+ *     <item/>
+ * </menu>
+ */
 class MenuItemTagVisitor(
     child: NodeVisitor,
     val config: SuperGuardConfig

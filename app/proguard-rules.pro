@@ -22,5 +22,5 @@
 -obfuscationdictionary mt-dictionary.txt
 -packageobfuscationdictionary mt-dictionary.txt
 -classobfuscationdictionary mt-dictionary.txt
--repackageclasses 'androidx.gt.app'
+-repackageclasses 'androidx.extra.app'
 -dontshrink

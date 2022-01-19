@@ -35,9 +35,9 @@ class SuperGuardPlugin : Plugin<Project> {
     }
 
     private fun createGuardTask(project: Project, variant: ApplicationVariant) {
-//        if (variant.buildType.name.equals("debug")) {
-//            return
-//        }
+        if (variant.buildType.name == "debug") {
+            return
+        }
         val variantName = variant.name.capitalize()
         val processResourcesTaskName = "process${variantName}Resources"
         val optimizeResourcesTaskName = "optimize${variantName}Resources"

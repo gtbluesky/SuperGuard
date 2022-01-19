@@ -86,6 +86,14 @@ public class ARSCDecoder {
     private boolean mShouldResguardForType = false;
     private Writer mMappingWriter;
 
+    /**
+     * read construction
+     * @param arscStream
+     * @param decoder
+     * @param tableStringsResguard
+     * @throws AndrolibException
+     * @throws IOException
+     */
     private ARSCDecoder(InputStream arscStream, ApkProcessor decoder, Map<Integer, String> tableStringsResguard) throws AndrolibException, IOException {
         mTableStringsResguard = tableStringsResguard;
         mCurSpecNameToPos = new LinkedHashMap<>();
@@ -95,6 +103,14 @@ public class ARSCDecoder {
         proguardFileName();
     }
 
+    /**
+     * write construction
+     * @param arscStream
+     * @param decoder
+     * @param pkgs
+     * @param tableStringsResguard
+     * @throws FileNotFoundException
+     */
     private ARSCDecoder(InputStream arscStream, ApkProcessor decoder, ResPackage[] pkgs, Map<Integer, String> tableStringsResguard) throws FileNotFoundException {
         mTableStringsResguard = tableStringsResguard;
         mCurSpecNameToPos = new LinkedHashMap<>();
@@ -202,28 +218,6 @@ public class ARSCDecoder {
         mMappingWriter.flush();
     }
 
-    private static String getNetFileSizeDescription(long size) {
-        StringBuilder bytes = new StringBuilder();
-        DecimalFormat format = new DecimalFormat("###.0");
-        if (size >= 1024 * 1024 * 1024) {
-            double i = (size / (1024.0 * 1024.0 * 1024.0));
-            bytes.append(format.format(i)).append("GB");
-        } else if (size >= 1024 * 1024) {
-            double i = (size / (1024.0 * 1024.0));
-            bytes.append(format.format(i)).append("MB");
-        } else if (size >= 1024) {
-            double i = (size / (1024.0));
-            bytes.append(format.format(i)).append("KB");
-        } else {
-            if (size <= 0) {
-                bytes.append("0B");
-            } else {
-                bytes.append((int) size).append("B");
-            }
-        }
-        return bytes.toString();
-    }
-
     private void reWriteTable() throws AndrolibException, IOException {
 
         mIn = new ExtDataInput(new LittleEndianDataInputStream(new FileInputStream(mApkProcessor.getOutTempARSCFile())));
@@ -245,8 +239,9 @@ public class ARSCDecoder {
         checkChunkType(Header.TYPE_PACKAGE);
         int id = (byte) mIn.readInt();
         String name = mIn.readNullEndedString(128, true);
-        System.out.printf("reading packagename %s\n", name);
-
+        if (DEBUG) {
+            System.out.printf("reading packagename %s\n", name);
+        }
         /* typeNameStrings */
         mIn.skipInt();
         /* typeNameCount */
@@ -262,11 +257,7 @@ public class ARSCDecoder {
 
         mPkg = new ResPackage(id, name);
         // 系统包名不混淆
-        if (mPkg.getName().equals("android")) {
-            mPkg.setCanResguard(false);
-        } else {
-            mPkg.setCanResguard(true);
-        }
+        mPkg.setCanResguard(!mPkg.getName().equals("android"));
         nextChunk();
         while (mHeader.type == Header.TYPE_LIBRARY) {
             readLibraryType();
@@ -312,17 +303,6 @@ public class ARSCDecoder {
         while (mHeader.type == Header.TYPE_SPEC_TYPE) {
             writeTableTypeSpec();
         }
-    }
-
-    private HashSet<Pattern> getWhiteList(String resType) {
-        final String packName = mPkg.getName();
-        if (mApkProcessor.getConfig().getWhiteList().containsKey(packName)) {
-            if (mApkProcessor.getConfig().getUseWhiteList()) {
-                HashMap<String, HashSet<Pattern>> typeMaps = mApkProcessor.getConfig().getWhiteList().get(packName);
-                return typeMaps.get(resType);
-            }
-        }
-        return null;
     }
 
     private void readLibraryType() throws AndrolibException, IOException {
@@ -845,61 +825,6 @@ public class ARSCDecoder {
         }
     }
 
-    public static class FlagsOffset {
-        public final int offset;
-        public final int count;
-
-        public FlagsOffset(int offset, int count) {
-            this.offset = offset;
-            this.count = count;
-        }
-    }
-
-    private static class MergeDuplicatedResInfo {
-        private String fileName;
-        private String filePath;
-        private String originalName;
-        private String md5;
-
-        private MergeDuplicatedResInfo(String fileName, String filePath, String originalName, String md5) {
-            this.fileName = fileName;
-            this.filePath = filePath;
-            this.originalName = originalName;
-            this.md5 = md5;
-        }
-
-        static class Builder {
-            private String fileName;
-            private String filePath;
-            private String originalName;
-            private String md5;
-
-            Builder setFileName(String fileName) {
-                this.fileName = fileName;
-                return this;
-            }
-
-            Builder setFilePath(String filePath) {
-                this.filePath = filePath;
-                return this;
-            }
-
-            public Builder setMd5(String md5) {
-                this.md5 = md5;
-                return this;
-            }
-
-            Builder setOriginalName(String originalName) {
-                this.originalName = originalName;
-                return this;
-            }
-
-            MergeDuplicatedResInfo create() {
-                return new MergeDuplicatedResInfo(fileName, filePath, originalName, md5);
-            }
-        }
-    }
-
     private class ResguardStringBuilder {
         private final List<String> mReplaceStringBuffer;
         private final Set<Integer> mIsReplaced;
@@ -994,16 +919,6 @@ public class ARSCDecoder {
                     }
                 }
             }
-        }
-
-        // 对于某种类型用过的mapping，全部不能再用了
-        public void removeStrings(Collection<String> collection) {
-            if (collection == null) return;
-            mReplaceStringBuffer.removeAll(collection);
-        }
-
-        public boolean isReplaced(int id) {
-            return mIsReplaced.contains(id);
         }
 
         public boolean isInWhiteList(int id) {

@@ -20,7 +20,6 @@ public class ResID {
     public final int package_;
     public final int type;
     public final int entry;
-
     public final int id;
 
     public ResID(int package_, int type, int entry) {

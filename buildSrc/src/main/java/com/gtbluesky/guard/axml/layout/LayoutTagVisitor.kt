@@ -3,6 +3,10 @@ package com.gtbluesky.guard.axml.layout
 import com.gtbluesky.guard.config.SuperGuardConfig
 import pxb.android.axml.NodeVisitor
 
+/**
+ * res/layout?/.xml
+ * </>
+ */
 class LayoutTagVisitor(
     child: NodeVisitor,
     val config: SuperGuardConfig

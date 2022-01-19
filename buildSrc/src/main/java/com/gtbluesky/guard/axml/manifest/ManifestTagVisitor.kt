@@ -3,6 +3,10 @@ package com.gtbluesky.guard.axml.manifest
 import com.gtbluesky.guard.config.SuperGuardConfig
 import pxb.android.axml.NodeVisitor
 
+/**
+ * AndroidManifest.xml
+ * <manifest/>
+ */
 class ManifestTagVisitor(
     child: NodeVisitor,
     val config: SuperGuardConfig

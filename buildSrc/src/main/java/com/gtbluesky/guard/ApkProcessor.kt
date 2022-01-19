@@ -5,7 +5,6 @@ import com.gtbluesky.guard.directory.DirectoryException
 import com.gtbluesky.guard.directory.ExtFile
 import com.gtbluesky.guard.exception.AndrolibException
 import com.gtbluesky.guard.res.decoder.ARSCDecoder
-import com.gtbluesky.guard.res.decoder.RawARSCDecoder
 import com.gtbluesky.guard.util.FileOperation
 import com.gtbluesky.guard.util.Utils
 import org.apache.commons.io.FileUtils
@@ -119,7 +118,6 @@ class ApkProcessor(zipFile: File, val config: SuperGuardConfig) {
             return
         }
         FileUtils.delete(outARSCFile)
-        RawARSCDecoder.decode(zipExtFile.directory.getFileInput("resources.arsc"))
         val tableStringsResguard = LinkedHashMap<Int, String>()
         val packages = ARSCDecoder.decode(zipExtFile.directory.getFileInput("resources.arsc"), this, tableStringsResguard)
         copyOtherResFiles()

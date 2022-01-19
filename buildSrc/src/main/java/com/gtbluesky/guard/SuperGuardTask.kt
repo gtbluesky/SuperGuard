@@ -2,22 +2,21 @@ package com.gtbluesky.guard
 
 import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.api.BaseVariantOutput
+import com.gtbluesky.guard.axml.layout.LayoutTagVisitor
+import com.gtbluesky.guard.axml.manifest.ManifestTagVisitor
+import com.gtbluesky.guard.axml.menu.MenuRootTagVisitor
+import com.gtbluesky.guard.axml.xml.AccessibilityTagVisitor
 import com.gtbluesky.guard.config.SuperGuardConfig
 import com.gtbluesky.guard.extension.SuperGuardExtension
-import com.gtbluesky.guard.axml.layout.LayoutTagVisitor
-import com.gtbluesky.guard.axml.menu.MenuRootTagVisitor
-import com.gtbluesky.guard.axml.manifest.ManifestTagVisitor
 import org.apache.commons.io.FileUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import proguard.obfuscate.MappingProcessor
 import proguard.obfuscate.MappingReader
-import pxb.android.axml.AxmlReader
-import pxb.android.axml.AxmlVisitor
-import pxb.android.axml.AxmlWriter
-import pxb.android.axml.NodeVisitor
-import pxb.android.axml.Util
+import pxb.android.arsc.ArscDumper
+import pxb.android.arsc.ArscParser
+import pxb.android.axml.*
 import java.io.*
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -69,8 +68,15 @@ open class SuperGuardTask : DefaultTask() {
         val obscureApPath = buildObscureResourcesPath(output)
         val apkProcessor = ApkProcessor(rawApPath.toFile(), config)
         unpackResZip(apkProcessor, obscureApPath.parent.toFile())
-        processLayout(obscureApPath.parent.toFile().absolutePath + File.separator + "temp" + File.separator + "res", config)
-        processManifest(obscureApPath.parent.toFile().absolutePath + File.separator + "temp" + File.separator + "AndroidManifest.xml", config)
+        processResXml(
+            obscureApPath.parent.toFile().absolutePath + File.separator + "temp" + File.separator + "res",
+            config
+        )
+        processManifest(
+            obscureApPath.parent.toFile().absolutePath + File.separator + "temp" + File.separator + "AndroidManifest.xml",
+            config
+        )
+//        processResources2(obscureApPath.parent.toFile().absolutePath + File.separator + "temp" + File.separator + "resources.arsc")
         processResources(apkProcessor)
         packResZip(config, apkProcessor, obscureApPath.toFile())
         optApPath.toFile().let {
@@ -137,6 +143,12 @@ open class SuperGuardTask : DefaultTask() {
         )
     }
 
+    private fun processResources2(arsc: String) {
+        val data = Util.readFile(File(arsc))
+        val pkgs = ArscParser(data).parse()
+        ArscDumper.dump(pkgs)
+    }
+
     private fun unpackResZip(processor: ApkProcessor, outDir: File) {
         processor.unpack(outDir)
     }
@@ -163,7 +175,7 @@ open class SuperGuardTask : DefaultTask() {
             try {
                 reader = BufferedReader(FileReader(file))
                 var char = reader.readLine()?.trim() ?: ""
-                while(char.isNotEmpty()) {
+                while (char.isNotEmpty()) {
                     if (!config.charsFromDic.contains(char)) {
                         config.charsFromDic.add(char)
                     }
@@ -185,7 +197,10 @@ open class SuperGuardTask : DefaultTask() {
     private fun readMapping(config: SuperGuardConfig) {
         variant.mappingFileProvider?.get()?.files?.first()?.let {
             MappingReader(it).pump(object : MappingProcessor {
-                override fun processClassMapping(className: String?, newClassName: String?): Boolean {
+                override fun processClassMapping(
+                    className: String?,
+                    newClassName: String?
+                ): Boolean {
                     if (!className.isNullOrEmpty() && !newClassName.isNullOrEmpty()) {
                         config.mappingMap[className] = newClassName
                     }
@@ -220,9 +235,9 @@ open class SuperGuardTask : DefaultTask() {
         }
     }
 
-    private fun processLayout(resDir: String, config: SuperGuardConfig) {
+    private fun processResXml(resDir: String, config: SuperGuardConfig) {
         File(resDir).listFiles().filter {
-            it.isDirectory && isLayoutDir(it.name)
+            it.isDirectory && isNeedProcessDir(it.name)
         }.flatMap {
             it.listFiles().asIterable()
         }.forEach {
@@ -231,15 +246,25 @@ open class SuperGuardTask : DefaultTask() {
             try {
                 AxmlReader(bytes).accept(object : AxmlVisitor(writer) {
                     override fun child(ns: String?, name: String?): NodeVisitor {
-                        return if (it.parentFile.name.startsWith("layout")) {
-                            val newName = if (name?.contains(".") == true) {
-                                config.mappingMap[name] ?: name
-                            } else {
-                                name
+                        return when {
+                            it.parentFile.name.startsWith("layout") -> {
+                                val newName = if (name?.contains(".") == true) {
+                                    config.mappingMap[name] ?: name
+                                } else {
+                                    name
+                                }
+                                LayoutTagVisitor(super.child(ns, newName), config)
                             }
-                            LayoutTagVisitor(super.child(ns, newName), config)
-                        } else {
-                            MenuRootTagVisitor(super.child(ns, name), config)
+                            it.parentFile.name.startsWith("menu") -> {
+                                MenuRootTagVisitor(super.child(ns, name), config)
+                            }
+                            else -> {
+                                if (name == "accessibility-service") {
+                                    AccessibilityTagVisitor(super.child(ns, name), config)
+                                } else {
+                                    super.child(ns, name)
+                                }
+                            }
                         }
                     }
                 })
@@ -251,11 +276,11 @@ open class SuperGuardTask : DefaultTask() {
         }
     }
 
-    private fun isLayoutDir(dirName: String): Boolean {
+    private fun isNeedProcessDir(dirName: String): Boolean {
         // layout and menu xml
         // sometimes, we can use a string res for value, e.g app:behavior="@string/my_appbar_scrolling_view_behavior"
         // <string name="my_appbar_scrolling_view_behavior" translatable="false">com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior</string>
-        return dirName.startsWith("layout") || dirName.startsWith("menu")
+        return dirName.startsWith("layout") || dirName.startsWith("menu") || dirName.startsWith("xml")
     }
 
     private fun processManifest(manifestPath: String, config: SuperGuardConfig) {

@@ -4,6 +4,12 @@ import com.gtbluesky.guard.config.SuperGuardConfig
 import pxb.android.axml.NodeVisitor
 import pxb.android.Res_value
 
+/**
+ * AndroidManifest.xml
+ * <manifest>
+ *     <application/>
+ * </manifest>
+ */
 class ApplicationTagVisitor(
     child: NodeVisitor,
     val config: SuperGuardConfig
