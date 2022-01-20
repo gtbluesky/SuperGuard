@@ -3,10 +3,12 @@ package com.gtbluesky.guard
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.api.ApplicationVariant
 import com.gtbluesky.guard.extension.SuperGuardExtension
+import org.apache.commons.io.FileUtils
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.util.VersionNumber
+import java.io.File
 import java.nio.file.Paths
 
 /**
@@ -15,6 +17,12 @@ import java.nio.file.Paths
  * 混淆自定义Application、自定义View等在xml中所引用的类
  */
 class SuperGuardPlugin : Plugin<Project> {
+
+    companion object {
+        private val CONSUMER_PROGURAD_INFIX_AAR = "transformed${File.separator}jetified-"
+        private val CONSUMER_PROGURAD_INFIX_JAR =
+            "transformed${File.separator}rules${File.separator}lib${File.separator}META-INF${File.separator}proguard${File.separator}"
+    }
 
     override fun apply(project: Project) {
         val isAndroidProject = project.plugins.hasPlugin("com.android.application")
@@ -70,6 +78,57 @@ class SuperGuardPlugin : Plugin<Project> {
         // 但是我们需在这两个Task都完成后才进行资源混淆，所以采用以下方式
         optimizeResourcesTask?.finalizedBy(guardTask)
         minifyWithR8Task?.finalizedBy(guardTask)
+
+//        project.tasks.findByName("merge${variantName}NativeLibs")?.doLast {
+//            inputs.files.forEach {
+//                println("doLast inputs path=${it.absolutePath}")
+//            }
+//            outputs.files.forEach {
+//                println("doLast outputs path=${it.absolutePath}")
+//            }
+//        }
+        val extension = project.extensions.getByType(SuperGuardExtension::class.java)
+        if (extension.ignoreProguards.isNullOrEmpty()) {
+            return
+        }
+        val proguardFilesTempDir = Paths.get(
+            project.buildDir.path,
+            "intermediates",
+            "proguard_files_temp"
+        ).toFile()
+        val proguardFilesMap = mutableMapOf<String, String>()
+        FileUtils.forceMkdir(proguardFilesTempDir)
+        minifyWithR8Task?.doFirst {
+            inputs.files.filter {
+                (it.absolutePath.endsWith("proguard.txt")
+                        && it.absolutePath.contains(
+                    CONSUMER_PROGURAD_INFIX_AAR
+                )) || (it.absolutePath.endsWith(".pro")
+                        && it.absolutePath.contains(
+                    CONSUMER_PROGURAD_INFIX_JAR
+                ))
+            }.forEach outer@ {
+                if (extension.ignoreProguards?.size == proguardFilesMap.size) return@doFirst
+
+                extension.ignoreProguards?.forEach { proguard ->
+                    if (it.absolutePath.contains("${CONSUMER_PROGURAD_INFIX_AAR}$proguard")
+                        || it.absolutePath.contains("${CONSUMER_PROGURAD_INFIX_JAR}$proguard")) {
+                        proguardFilesMap[proguard] = it.absolutePath
+                        FileUtils.moveFile(it, File(proguardFilesTempDir.absolutePath, "$proguard.txt"))
+                        return@outer
+                    }
+                }
+            }
+        }
+        minifyWithR8Task?.doLast {
+            if (proguardFilesMap.isNullOrEmpty()) {
+                return@doLast
+            }
+            proguardFilesMap.forEach { (name, path) ->
+                println("path=$path")
+                FileUtils.moveFile(File(proguardFilesTempDir.absolutePath, "$name.txt"), File(path))
+            }
+        }
     }
 }
 

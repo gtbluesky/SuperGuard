@@ -93,6 +93,9 @@ superGuard {
 //    )
 //    resDir = "haha"
     dictionary = "mt-dictionary.txt"
+    ignoreProguards = setOf(
+        "okhttp"
+    )
 }
 
 dependencies {

@@ -5,4 +5,5 @@ open class SuperGuardExtension {
     var resDir: String? = null
     var whiteList: List<String>? = null
     var dictionary: String? = null
+    var ignoreProguards: Set<String>? = null
 }

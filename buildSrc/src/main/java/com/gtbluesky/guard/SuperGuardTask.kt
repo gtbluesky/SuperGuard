@@ -27,7 +27,7 @@ open class SuperGuardTask : DefaultTask() {
     lateinit var variant: ApplicationVariant
 
     @TaskAction
-    fun execute() {
+    fun taskAction() {
         val extension = project.extensions.getByType(SuperGuardExtension::class.java)
         val config = SuperGuardConfig().apply {
             fixedResName = extension.fixedResName
